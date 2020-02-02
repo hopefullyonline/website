@@ -1,0 +1,59 @@
+---
+title: Get things done with GitLab Runners
+author: Anatoli Nicolae
+date: 2020-01-28
+hero: ./images/hero.jpg
+excerpt: With the growing community interest in Gatsby, we hope to create more resources that make it easier for anyone to grasp the power of this incredible tool.
+slug: get-things-done-with-gitlab-runners-ck5x3ghbo08wsqps1bvyb2nd2
+---
+
+Most of projects now have some kind of automation, where it's building a Docker image or a website using webpack. There are also a lot of free CI/CD solutions that allow you to build your projects, but most of them are limited, hard to figure out or simply not enough. Here's where Gitlab come in help, providing a solid infrastructure to run your pipelines, using their Gitlab Runners.
+
+What are GitLab Runners?
+--
+GitLab Runners are agents that interface with a shell, a Docker daemon, on your server or using their shared runners. That's right, you can host the Runners yourself!
+
+So what's the plan?
+--
+We want to be able to use, let's say, a local server running 2 VMs to build our projects. We're planning to have both Windows and Linux compatibility, so we'll run a Ubuntu Bionic box as well as a Windows Server 2019 box. Both of them will have Docker on-board, allowing us to use whatever image we want to.
+
+How to install them?
+--
+[GitLab's documentation about this](https://docs.gitlab.com/runner/install/)  is pretty easy to understand and apply on Linux, what we're gonna dive into is the Windows part which is not that difficult either so here's a copy-pastable block:
+
+```ps1
+# Create GitLab runner home
+New-Item -ItemType Directory -Force -Path C:\GitLab-Runner
+
+# Exclude it from antivirus scans
+Add-MpPreference -ExclusionPath C:\GitLab-Runner
+
+# Download gitlab-runner.exe
+(New-Object Net.WebClient).DownloadFile("https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-windows-amd64.exe", "C:\GitLab-Runner\gitlab-runner.exe")
+
+# Register shell executor
+Start-Process -FilePath C:\GitLab-Runner\gitlab-runner.exe -Argumentlist register,"--url https://gitlab.com/","--executor shell"
+
+# Register Docker executor
+Start-Process -FilePath C:\GitLab-Runner\gitlab-runner.exe -Argumentlist register,"--url https://gitlab.com/","--executor docker-windows","--tag-list docker,windows,server-2019","--docker-image mcr.microsoft.com/windows/servercore"
+
+# Install Service
+Start-Process -FilePath C:\GitLab-Runner\gitlab-runner.exe -Argumentlist install
+
+# Add Docker as dependency
+cmd.exe /c "sc config gitlab-runner depend= /"
+cmd.exe /c "sc config gitlab-runner depend= docker"
+
+# Reboot
+Restart-Computer
+```
+
+How to use them now?
+--
+To use your freshly created GitLab Runners you'll simply have to write your own `.gitlab-ci.yml`, which can rely on Docker images and run builds inside them, or even use Visual Studio via shell-runners.
+
+Conclusion
+--
+Even though it requires a bit of configuration and maybe porting your old pipeline definitions over, GitLab CI/CD is a great solution compared to other tools such as Drone CI or Jenkins. You are free to build inside Docker, or build Docker images, thing that can be tricky if your tool runs already on Docker (DIND is hard and awful), and everything is easier to understand thanks to pretty straight-forwards `.gitlab-ci.yml`s.
+
+What do *you* use? How do you manage multi-platform builds? Is your pipeline clean and easy to catch up on?

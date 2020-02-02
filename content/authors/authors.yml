@@ -1,0 +1,13 @@
+- name: Anatoli Nicolae
+  bio: |
+    Sharing is the most useful act you can do to teach others from your own
+    experience—this blog is just that!
+  avatar: ./avatars/anatoli-nicolae.jpg
+  social:
+    - url: https://twitter.com/anatolinicolae
+    - url: https://www.instagram.com/anatolinicolae/
+    - url: https://unsplash.com/@an
+    - url: https://www.linkedin.com/in/nicolae/
+    - url: https://stackoverflow.com/users/1219246/anatoli
+    - url: https://github.com/anatolinicolae
+  featured: true

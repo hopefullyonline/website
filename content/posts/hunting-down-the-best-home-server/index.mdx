@@ -1,0 +1,71 @@
+---
+title: Hunting down the best home server
+author: Anatoli Nicolae
+date: 2019-06-11
+hero: ./images/hero.jpg
+excerpt: With the growing community interest in Gatsby, we hope to create more resources that make it easier for anyone to grasp the power of this incredible tool.
+slug: hunting-down-the-best-home-server
+---
+
+Some time ago I've went out and searched for months for an HP Microserver Gen8 to replace my day-to-day HDDs which have been failing *one too many times* already.
+
+As they're discontinued for some years now, people selle them for a lot money but after a long search and plenty *Google Alerts* I've found a used one in good condition **which was also cheap**. 🙌
+
+Turns out that pumping it with a better CPU, 16GBs of RAM and 2 SSDs is *not enough* for running a lot of VMs and Docker stuff. The space of a mini-ATX is not enough—we have to go bigger.
+
+Procrastination
+--
+So there's the YouTube algorithm, which *kinda knows* what you're into, that somehow guesses my next build. I see [Jarrod's Tech video](https://youtu.be/eCt0JQ9sTd0) of a 16-core and 128GB RAM beast suggested in the feed, and I knew that it was going to be my next build. I **had to have** that shiny beast.
+
+<YouTube videoId="eCt0JQ9sTd0" />
+
+
+<YouTube videoId="4fHw4GeW3EU" />
+
+Looks like procrastinating is sometimes actually good.
+
+This build is actually way better than my HP Microserver mainly because you're not bound to manufacturer's hardware limits which for example wouldn't allow you to put more than 8GB per memory slot.
+
+Research
+--
+After enjoying Jarrod's amazing video, I've immediately sent that to my friend, it seemed to be the best upgrade that I could possibly go for. And so I did.
+
+I started researching the components but it seemed to be kinda the same as for the Microserver, for which there was a great demand as more and more people used to look for a nice NAS which could handle Plex or similar software.
+
+The motherboard was the main piece of the build and unfortunately there was nobody selling it on eBay or such sites. A similar build with CPU and RAM as available on the site Jarrod suggested, but was too expensive.
+
+Continuing to monitor the market, I found a listing of the exact board I was looking for on an italian website. Bought it for about €150 shipped, and the research of the other parts has resumed.
+
+CPU
+---
+The motherboard had two LGA2011 sockets, so I needed to find a CPU that **supports dual socket environments**. There were a lot of comparison tables, a lot of opinions and whatever you can throw at it. Choosing one wasn't easy at all.
+
+I wanted a CPU that could handle **a lot of work**, since the main use case was to have multiple VMs running on it. I also wanted it **not to require much power**, so the final choice was an eBay listing of used Intel Xeon E5-2650, for €50 each.
+
+Power supply
+---
+I haven't built an custom PC for a long time, so I thought any kind of PSU could be a good fit. **WRONG!** Found out later that you should actually consider all system components' power consumption and get a PSU that could handle them all. I also wanted to get a better PSU with the best 80 Plus rating, so I went for a Seasonic SSR-650TR which is a **650W Titanium rated PSU** that could handle well enough my setup.
+
+Disks
+---
+Safe data was the main goal here. I already had 2x500GB SSDs but I still needed larger drives.
+
+Seagate's Ironwolf 8TB drives were my choice for **best quality/capacity ratio**, and fortunately they were brought down to about €200 each.
+
+Case and cooling
+---
+Jarrod's case choice was really inspiring. **I WANTED** it to be lit, but again there was nobody selling it for a relatively good price. eBay came again in great help and I was able to get it for around €150. It was awesome.
+
+The case came already with a lot of fans, but I needed two more for the CPUs since this wasn't a Gen8 with kinda 👌 passive cooling. Again, Jarrod's choice of two Noctua NH-U12DX was more than great.
+
+Assembling
+---
+All the parts came in relatively fast shipping times and in few weeks I had all the parts for the assembly.
+
+It didn't take much to figure out where everything fit and it was up and running in about 2 hours.
+
+It wasn't lighting up tho, so I bought a LED strip. While mounting it, I noticed there was another molex to connect, which purpose was to—guess what—power the integrated LEDs. 🤦‍♂️
+
+Next steps
+--
+After powering everything up there's another choice to make: *the OS* (coming soon).

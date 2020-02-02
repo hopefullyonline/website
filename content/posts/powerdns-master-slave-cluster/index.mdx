@@ -1,0 +1,217 @@
+---
+title: PowerDNS master-slave cluster
+author: Anatoli Nicolae
+date: 2019-12-29
+hero: ./images/hero.png
+excerpt: With the growing community interest in Gatsby, we hope to create more resources that make it easier for anyone to grasp the power of this incredible tool.
+slug: powerdns-master-slave-cluster-ck4r2lzo500m9v2s1bkle40qh
+---
+
+This guide's purpose is to help you set up a replicated **PowerDNS cluster using AXFR notifications** between servers instead of full DB replication, which can be tricky to set up some times.
+
+Prerequisites
+--
+This guide assumes we have the following 3 servers running on CentOS 7:
+
+Hostname | IP | Type | Operation Mode
+--- | --- | --- | ---
+`hostmaster.example.com` | `172.16.0.1` | Master | [supermaster](https://doc.powerdns.com/authoritative/modes-of-operation.html#master-operation)
+`ns01.example.com` | `192.168.0.1` | Slave | [ superslave](https://doc.powerdns.com/authoritative/modes-of-operation.html#supermaster-automatic-provisioning-of-slaves)
+`ns02.example.com` | `192.168.0.2` | Slave | [ superslave](https://doc.powerdns.com/authoritative/modes-of-operation.html#supermaster-automatic-provisioning-of-slaves)
+
+Note that these local IPs are purely explanatory and you **should use your servers' public IPs** instead, if they're not the same network.
+
+Operation mode on the slave servers is `superslave`, which allows them to **automatically create zones and sync records**, while just `slave` mode will not create new zones. [Learn more about superslaves.](https://doc.powerdns.com/authoritative/modes-of-operation.html#supermaster-automatic-provisioning-of-slaves)
+
+Make sure that domains on the Master node have their type set to `MASTER`, since **other values will not notify** the slaves. You should use `NATIVE` when performing a DB replication instead.
+
+Install repos
+--
+The first step is to enable EPEL and PowerDNS repos to access all packages needed. We'll run an update too just to fully have the system up to date.
+
+```bash
+yum install -y epel-release yum-plugin-priorities
+curl -o /etc/yum.repos.d/powerdns-auth-42.repo https://repo.powerdns.com/repo-files/centos-auth-42.repo
+yum update -y
+```
+
+Install MariaDB and pdns
+--
+We can now install in one shot both MariaDB and PowerDNS' packages running the following command.
+
+```bash
+yum install -y mariadb mariadb-server pdns pdns-backend-mysql
+```
+
+Enable firewall, MariaDB and pdns services
+--
+Enable all three services and start them up using `--now`. PowerDNS may give an error on startup since there are no backends configured yet, but that's not an issue at this point. We also proceed to add DNS to our firewall rules in order to accept connections on port 53, reloading then the firewall.
+
+```bash
+systemctl enable --now firewalld mariadb pdns
+firewall-cmd --add-service=dns --permanent
+firewall-cmd --reload
+```
+
+MariaDB setup
+--
+The DB should be up and running now, but we first need to finish the setup running the following command:
+
+```bash
+mysql_secure_installation
+```
+
+This will allow us to log in now as root using the password we set above.
+
+```bash
+mysql -u root -p
+```
+
+Now that we're in the DB, we can create powerdns' database and the user we'll use to connect to the DB.
+
+```sql
+CREATE DATABASE powerdns;
+GRANT ALL ON powerdns.* TO 'powerdns'@'localhost' IDENTIFIED BY 'powerdns';
+FLUSH PRIVILEGES;
+```
+
+Install schema
+---
+While still in the DB, we can run the following command to use our newly created DB:
+
+```sql
+USE powerdns;
+```
+
+We now have to create the schema that PowerDNS runs on. You can find more about the configuration, and a copy-pastable schema, on PowerDNS' documentation at the following link:
+
+https://doc.powerdns.com/authoritative/guides/basic-database.html#example-configuring-mysql
+
+Add supermasters
+--
+**On each of the superslaves** we have to define our supermaster (`172.16.0.1`). To do this, we have to run INSERT a new row on `ns01` as following:
+
+```sql
+INSERT INTO `powerdns`.`supermasters` (`ip`, `nameserver`) VALUES ('172.16.0.1', 'ns01.example.com');
+```
+
+and the following one on `ns02`:
+
+```sql
+INSERT INTO `powerdns`.`supermasters` (`ip`, `nameserver`) VALUES ('172.16.0.1', 'ns02.example.com');
+```
+
+PowerDNS slave setup
+--
+We can now configure pdns to send notification from the master server, and to receive them on the slave servers.
+
+If you already have anything in your configuration, just make a copy of it and possibly merge it later.
+
+```bash
+cp /etc/pdns/pdns.conf /etc/pdns/pdns.conf.original
+```
+
+Here's a **master** boilerplate configuration which should work, but you may change it to fit your own setup.
+
+```bash
+cat > /etc/pdns/pdns.conf <<'EOF'
+# Master
+
+daemon=no
+guardian=no
+setgid=pdns
+setuid=pdns
+
+cache-ttl=20
+launch=gmysql
+webserver-port=8081
+webserver-allow-from=127.0.0.1,::1
+api-key=powerdns123
+expand-alias=no
+webserver=no
+api=True
+include-dir=/etc/pdns/local.d
+resolver=no
+version-string=anonymous
+webserver-address=127.0.0.1
+
+launch=gmysql
+gmysql-host=localhost
+gmysql-dbname=powerdns
+gmysql-user=powerdns
+gmysql-password=powerdns
+gmysql-dnssec=no
+
+default-ttl=60
+dnsupdate=yes
+master=yes
+
+EOF
+```
+
+Here's a **slave** boilerplate configuration which should work, but you may change it to fit your own setup.
+
+```bash
+cat > /etc/pdns/pdns.conf <<'EOF'
+# Slave
+
+daemon=no
+guardian=no
+setgid=pdns
+setuid=pdns
+
+cache-ttl=20
+expand-alias=no
+webserver=no
+resolver=no
+version-string=anonymous
+
+launch=gmysql
+gmysql-host=localhost
+gmysql-dbname=powerdns
+gmysql-user=powerdns
+gmysql-password=powerdns
+gmysql-dnssec=no
+
+allow-axfr-ips=172.16.0.1/32
+allow-dnsupdate-from=172.16.0.1/32
+allow-notify-from=172.16.0.1/32
+dnsupdate=yes
+master=no
+slave=yes
+superslave=yes
+
+EOF
+```
+
+Note that the Master could also have an active API to receive updates via REST API, which is the default configuration in  [ApisCP](https://apiscp.com/)  and you should definitely check it out.
+
+Restarting the service shouldn't give an error anymore, and if you did everything correctly by following this guide obviously, it will all run smoothly!
+
+```bash
+systemctl restart pdns
+```
+
+Conclusion
+--
+**Congratulations!** You've successfully set up a PowerDNS cluster. You can verify the replication by keeping an eye on the slave databases, which should automatically create new zone and insert records upon master notification.
+
+Here are two one-liners which you may find helpful, such as:
+
+- all zone renotify:
+  ```bash
+  pdns_control list-zones --type master | sed '$d' | xargs -L1 pdns_control notify
+  ```
+
+- zone cleanup:
+  ```bash
+  pdns_control list-zones --type slave | sed '$d' | xargs -I {} sh -c "host -t SOA {} 172.16.0.1 | tail -n1 | grep -q 'has SOA record' || pdnsutil delete-zone {}"
+  ```
+
+Are you a PowerDNS guru? Share your insights on similar cluster configuration or any tips you think could help in the comments! It's not that easy to get this right, and it would be awesome if you could help!
+
+More links:
+- [PowerDNS Docs: server settings](https://doc.powerdns.com/authoritative/settings.html)
+- [PowerDNS Docs: configuring MySQL](https://doc.powerdns.com/authoritative/guides/basic-database.html#example-configuring-mysql)
+- [DigitalOcean Community: PowerDNS server setup tutorial](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-powerdns-with-a-mariadb-backend-on-ubuntu-14-04)
+- [DigitalOcean Community: PowerDNS replication tutorial](https://www.digitalocean.com/community/tutorials/how-to-configure-dns-replication-on-a-slave-powerdns-server-on-ubuntu-14-04)
