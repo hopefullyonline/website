@@ -1,0 +1,22 @@
+image: node:lts-alpine
+
+cache:
+  paths:
+    - node_modules/
+
+before_script:
+  - apk --update add openssh-client
+  - rm -rf /var/lib/apt/lists/*
+  - rm /var/cache/apk/*
+  - mkdir ~/.ssh
+  - echo $SQRD_DEVOPS_KEY > ~/.ssh/sqrd_devops
+  - echo $SQRD_DEVOPS_PUB > ~/.ssh/sqrd_devops.pub
+  - chmod 700 ~/.ssh; chmod 600 ~/.ssh/*
+
+pages:
+  script:
+    - yarn install
+    - yarn build
+    - scp -i ~/.ssh/sqrd_devops -r public/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_DESTINATION"
+  only:
+    - master
