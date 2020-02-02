@@ -17,7 +17,7 @@ pages:
   script:
     - yarn install
     - yarn build
-    - scp -i ~/.ssh/sqrd_devops -r public/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_DESTINATION"
+    - scp -i ~/.ssh/sqrd_devops -r public/ "${DEPLOY_USER}@{$DEPLOY_HOST}:${DEPLOY_DESTINATION}"
   only:
     - master
   tags:
