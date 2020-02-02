@@ -20,3 +20,6 @@ pages:
     - scp -i ~/.ssh/sqrd_devops -r public/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_DESTINATION"
   only:
     - master
+  tags:
+    - docker-executor
+    - linux
