@@ -22,7 +22,7 @@ const ArticleHero: React.FC<ArticleHeroProps> = ({ article, authors }) => {
     article.hero.full.constructor === Object;
 
   return (
-    <Hero>
+    <div>
       <Header>
         <HeroHeading>{article.title}</HeroHeading>
         <HeroSubtitle hasCoAUthors={hasCoAUthors}>
@@ -39,39 +39,11 @@ const ArticleHero: React.FC<ArticleHeroProps> = ({ article, authors }) => {
           <ImagePlaceholder />
         )}
       </HeroImage>
-    </Hero>
+    </div>
   );
 };
 
 export default ArticleHero;
-
-const Hero = styled.div`
-  ${p => mediaqueries.phablet`
-    &::before {
-      content: "";
-      width: 100%;
-      height: 20px;
-      background: ${p.theme.colors.primary};
-      position: absolute;
-      left: 0;
-      top: 0;
-      transition: ${p.theme.colorModeTransition};
-    }
-
-    &::after {
-      content: "";
-      width: 100%;
-      height: 10px;
-      background: ${p.theme.colors.background};
-      position: absolute;
-      left: 0;
-      top: 10px;
-      border-top-left-radius: 25px;
-      border-top-right-radius: 25px;
-      transition: ${p.theme.colorModeTransition};
-    }
-  `}
-`;
 
 const ArticleMeta = styled.div<{ hasCoAUthors: boolean }>`
   margin-left: ${p => (p.hasCoAUthors ? '10px' : '0')};
