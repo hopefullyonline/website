@@ -69,7 +69,6 @@ const plugins = [
 ];
 
 module.exports = {
-    assetPrefix: `https://faster.hopefully.online`,
     siteMetadata,
     plugins,
 };
