@@ -5,16 +5,16 @@ cache:
     - node_modules/
 
 before_script:
-  - mkdir ~/.ssh
-  - echo $SQRD_DEVOPS_KEY > ~/.ssh/sqrd_devops
-  - echo $SQRD_DEVOPS_PUB > ~/.ssh/sqrd_devops.pub
-  - chmod 700 ~/.ssh; chmod 600 ~/.ssh/*
+  - mkdir -p ~/.ssh
+  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - echo "$SQRD_DEVOPS_KEY" | tr -d '\r' | ssh-add -
 
 pages:
   script:
     - yarn install
     - yarn build
-    - scp -i ~/.ssh/sqrd_devops -r public/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_DESTINATION"
+    - scp -r public/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_DESTINATION"
   only:
     - master
   tags:
