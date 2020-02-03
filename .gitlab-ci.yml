@@ -10,7 +10,7 @@ before_script:
   - eval $(ssh-agent -s)
   - echo "$SQRD_DEVOPS_KEY" | tr -d '\r' | ssh-add -
 
-pages:
+build:
   script:
     - yarn install
     - yarn build
