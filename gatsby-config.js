@@ -21,7 +21,7 @@ const siteMetadata = {
 
 const plugins = [
     {
-        resolve: "@narative/gatsby-theme-novela",
+        resolve: `@narative/gatsby-theme-novela`,
         options: {
             contentPosts: "content/posts",
             contentAuthors: "content/authors",
@@ -45,6 +45,9 @@ const plugins = [
             display: `standalone`,
             icon: `src/assets/favicon.png`,
         },
+    },
+    {
+        resolve: `gatsby-plugin-netlify`,
     },
     // {
     //   resolve: `gatsby-plugin-google-analytics`,
