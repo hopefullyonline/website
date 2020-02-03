@@ -7,7 +7,7 @@ export default merge(novelaTheme, {
         prism,
         primary: '#111',
         secondary: '#73737D',
-        accent: '#6cbf84',
+        accent: '#4bbcf4',
         background: "#fafafa",
         gradient: "linear-gradient(180deg, #fafafa 0%, hsla(220, 25%, 75%, 0.25) 100%)",
         modes: {
