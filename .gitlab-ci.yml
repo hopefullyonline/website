@@ -1,13 +1,10 @@
-image: node:lts-alpine
+image: node:lts
 
 cache:
   paths:
     - node_modules/
 
 before_script:
-  - apk --update add openssh-client libwebp libwebp-tools
-  - rm -rf /var/lib/apt/lists/*
-  - rm /var/cache/apk/*
   - mkdir ~/.ssh
   - echo $SQRD_DEVOPS_KEY > ~/.ssh/sqrd_devops
   - echo $SQRD_DEVOPS_PUB > ~/.ssh/sqrd_devops.pub
