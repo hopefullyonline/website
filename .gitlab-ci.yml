@@ -5,7 +5,7 @@ cache:
     - node_modules/
 
 before_script:
-  - apk --update add openssh-client
+  - apk --update add openssh-client libwebp libwebp-tools
   - rm -rf /var/lib/apt/lists/*
   - rm /var/cache/apk/*
   - mkdir ~/.ssh
