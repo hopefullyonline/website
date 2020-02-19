@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "hopefully.online",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "scripts": {
     "build": "gatsby build",
@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@narative/gatsby-theme-novela": "^0.*",
+    "@thundersquared/gatsby-plugin-htaccess-redirect": "^1.0.1",
+    "@thundersquared/gatsby-redirect-from": "^1.0.1",
     "gatsby": "^2.13.41",
     "gatsby-plugin-manifest": "^2.2.4",
     "gatsby-plugin-netlify": "^2.1.32",

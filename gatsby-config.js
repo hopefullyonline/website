@@ -2,7 +2,6 @@ const siteMetadata = {
     title: `hopefully.online by thundersquared`,
     name: `hopefully.online`,
     siteUrl: `https://hopefully.online`,
-    assetPrefix: `https://cdn.example.com`,
     description: `Just stay hopefully online relying on the best tools and technology around, learning the proper way together.`,
     hero: {
         heading: `Hopefully Online — Learn the proper way to <em style="font-family: minion-pro, Georgia, Serif;">stay online</em>.`,
@@ -48,10 +47,19 @@ const plugins = [
         },
     },
     {
+        resolve: `@thundersquared/gatsby-redirect-from`,
+        options: {
+            query: 'allMdx'
+        }
+    },
+    {
         resolve: `gatsby-plugin-sitemap`,
     },
     {
         resolve: `gatsby-plugin-netlify`,
+    },
+    {
+        resolve: `@thundersquared/gatsby-plugin-htaccess-redirect`,
     },
     // {
     //   resolve: `gatsby-plugin-google-analytics`,
