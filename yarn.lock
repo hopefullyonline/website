@@ -1480,10 +1480,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@thundersquared/gatsby-plugin-htaccess-redirect@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@thundersquared/gatsby-plugin-htaccess-redirect/-/gatsby-plugin-htaccess-redirect-1.0.3.tgz#f74d4e603252fcc593dc59913710ca2b2b5806fa"
-  integrity sha512-luLSvPS1I7grD/R7RVTCAg0NJXo46xdcu4al5YwMHU7iBC29NCB8OWDhSr6SjNdAJGJ/knHcgZVFiPx+p0jXOw==
+"@thundersquared/gatsby-plugin-htaccess-redirect@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@thundersquared/gatsby-plugin-htaccess-redirect/-/gatsby-plugin-htaccess-redirect-1.0.5.tgz#9c8783ab30ed549551a6c0d70f17ac3982bf3b0e"
+  integrity sha512-CVBSGRWDO6eVdKwAzUBsiS3+gM8Ee3dyo0q+pz9AQKQKv3oCr94OngP8NiRkCn/qKQG04zAilH3av3ZnHLE7Aw==
   dependencies:
     fs-extra "^7.0.0"
 
