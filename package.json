@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@narative/gatsby-theme-novela": "^0.*",
-    "@thundersquared/gatsby-plugin-htaccess-redirect": "^1.0.1",
-    "@thundersquared/gatsby-redirect-from": "^1.0.1",
+    "@thundersquared/gatsby-plugin-htaccess-redirect": "^1.0.3",
+    "@thundersquared/gatsby-redirect-from": "^1.0.3",
     "gatsby": "^2.13.41",
     "gatsby-plugin-manifest": "^2.2.4",
     "gatsby-plugin-netlify": "^2.1.32",
