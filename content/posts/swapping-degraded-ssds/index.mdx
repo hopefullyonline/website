@@ -1,0 +1,108 @@
+---
+title: Replacing heavily worn SSDs 
+author: Anatoli Nicolae
+date: 2020-04-13
+hero: ./images/ssd-replacement-hero.jpg
+excerpt: |
+  How to correctly swap old SSDs reporting wear and IO issues on a brand new server, without breaking stuff in production.
+slug: swapping-degraded-ssds
+---
+
+During the second half of past december we decided to move to a new server on Hetzner for our new production server, moving away from our old friend Plesk. After setting it up and running for a while, we've noticed that MySQL operations were taking a huge amount of time.
+
+After some time trying to debug MySQL, switching versions and testing dumps we've come to disk checks. It looks like the dedicated server we've got, had a relative intensive use before and the disks were worn out.
+
+We've then arranged with Hetzner's guys to work out a step by step replacements of RAIDed disks. We would swap one disk at a time, first removing it from the array, physically swapping it, re-adding it to the array and syncing.
+
+## Swapping a disk
+
+In order to be able to detach a disk and replace it, we have to first mark it as faulty.
+
+```shell script
+mdadm --manage /dev/md0 --fail /dev/sda1
+mdadm --manage /dev/md1 --fail /dev/sda2
+mdadm --manage /dev/md2 --fail /dev/sda3
+```
+
+We can then proceed to remove partitions from the array.
+
+```shell script
+mdadm --manage /dev/md0 --remove /dev/sda1
+mdadm --manage /dev/md1 --remove /dev/sda2
+mdadm --manage /dev/md2 --remove /dev/sda3
+```
+
+When asking your provider to swap a disk, you may find useful to communicate the serial of the disk to be swapped for a coordinated process. You will be sure you're swapping the correct disk that you've previously marked as faulty.
+
+```shell script
+udevadm info --query=all --name=/dev/sda | grep ID_SERIAL
+ID_SERIAL=Crucial_CT256MX100SSD1_000000000000
+ID_SERIAL_SHORT=000000000000
+```
+
+Proceed with the physical disk swap, then boot the system again and start adjusting fresh new disk's partition.
+
+First thing to do would be to partition yourself the new disk. The partitioning should match previous disk's paritioning schema and can be achieved manually or even better by copying existing disk's partition (`/dev/sdb`) to the new one (`/dev/sda`).
+
+```shell script
+sfdisk -d /dev/sdb | sfdisk /dev/sda
+```
+
+Once the partition schema matches the one expected by the array, we can proceed to adding back the disk to the array.
+
+```shell script
+mdadm --manage /dev/md0 --add /dev/sda1
+mdadm --manage /dev/md1 --add /dev/sda2
+mdadm --manage /dev/md2 --add /dev/sda3
+```
+
+Wait for mdadm to perform the synchronization and you can proceed with the other disk.
+
+```shell script
+# Mark disk as failed
+mdadm --manage /dev/md0 --fail /dev/sdb1
+mdadm --manage /dev/md1 --fail /dev/sdb2
+mdadm --manage /dev/md2 --fail /dev/sdb3
+
+# Remove disk from array
+mdadm --manage /dev/md0 --remove /dev/sdb1
+mdadm --manage /dev/md1 --remove /dev/sdb2
+mdadm --manage /dev/md2 --remove /dev/sdb3
+
+# Fetch disk infos
+udevadm info --query=all --name=/dev/sdb | grep ID_SERIAL
+# ID_SERIAL=Crucial_CT256MX100SSD1_111111111111
+# ID_SERIAL_SHORT=111111111111
+
+# Copy partition
+sfdisk -d /dev/sda | sfdisk /dev/sdb
+
+# Add disk back to array
+mdadm --manage /dev/md0 --add /dev/sdb1
+mdadm --manage /dev/md1 --add /dev/sdb2
+mdadm --manage /dev/md2 --add /dev/sdb3
+```
+
+## Bootable partitions
+
+If RAIDed disk act as booting disk as well, make sure to make them bootable and to run `grub-install` after adding them to the array or you may run into booting issues otherwise.
+
+## NVMe or SSD disks
+
+When using NVMe or SSD disk by either relying or not on software RAID, always make sure you're also TRIMming data on the disks or it may induce some slowness over time. Most distributions already have tools to help you with that, the easiest one to use is `fstrim` service.
+
+```shell script
+systemctl enable fstrim.timer
+```
+
+## Conclusions
+
+You should have two brand new working disk back in your `mdadm` array. Also, here are some other commands you may find useful.
+
+```shell script
+# Synchronize data on disk with memory
+sync
+
+# Watch mdadm synchronization process
+watch cat /proc/mdstat
+```
